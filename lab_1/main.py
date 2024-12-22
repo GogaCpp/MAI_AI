@@ -4,6 +4,7 @@ import matplotlib.animation as animation
 from function import beale, beale_gradient, rastrigin, rastrigin_gradient, numerical_gradient
 from GradientDescent import adam, gradient_descent, momentum_gradient_descent
 
+
 def test_optimization(func, grad_func, initial_points, learning_rate, tolerance, max_iterations, num_runs=5, method=gradient_descent, **method_kwargs):
     results = []
     for initial_point in initial_points:
