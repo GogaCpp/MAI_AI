@@ -28,7 +28,7 @@ def rosenbrock_grad(x):
 
 
 def test_gradient_descent(function, gradient):
-    initial_point = [3.0, 3.0]
+    initial_point = [-5.12, 5.12]
     gd = GradientDescent(function, gradient, learning_rate=0.1)
     optimal_point, history = gd.optimize(initial_point)
 
