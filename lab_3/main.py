@@ -12,7 +12,7 @@ parser.add_argument('-no_learn', action='store_false', help='if not need learn')
 args = parser.parse_args()
 
 storage_url = "postgresql://postgres:postgres@localhost:5432/postgres"
-# даже не знал что бывает рак молочной железы
+# даже не знал что бывает рак молочной железы 
 data = sklearn.datasets.load_breast_cancer()
 
 X = data.data
@@ -25,7 +25,10 @@ def objective(trial):  # Тут я определяю целевую функц�
     max_depth = trial.suggest_int('max_depth', 2, 32)
     min_samples_split = trial.suggest_float('min_samples_split', 0.1, 1.0)
 
-    clf = sklearn.ensemble.GradientBoostingClassifier(n_estimators=n_estimators, max_depth=max_depth, min_samples_split=min_samples_split)
+    clf = sklearn.ensemble.GradientBoostingClassifier(
+        n_estimators=n_estimators, max_depth=max_depth,
+        min_samples_split=min_samples_split
+    )
     clf.fit(X_train, y_train)
 
     y_pred = clf.predict(X_test)
