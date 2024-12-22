@@ -6,13 +6,28 @@ import sklearn.ensemble
 import sklearn.model_selection
 from sklearn.metrics import accuracy_score
 
-# ! вроде как аргпарсер лишний, но для тестового запуска я не хочу ждать 5 минут так что так
+'''
+postgresql service:
+start: sudo systemctl start postgresql
+status: sudo systemctl status postgresql
+stop: sudo systemctl stop postgresql
+
+
+usage: python main.py [-h] [-no_learn]
+
+options:
+    -h, --help  show this help message and exit
+    -no_learn   if not need learn
+'''
+
+# ! вроде как аргпарсер лишний, но для тестового запуска я не хочу ждать 5+ минут так что так
+# ! если что lscpu
 parser = argparse.ArgumentParser()
-parser.add_argument('-no_learn', action='store_false', help='if not need learn')
+parser.add_argument('-no_learn', action='store_false', help='if not need to learn')
 args = parser.parse_args()
 
 storage_url = "postgresql://postgres:postgres@localhost:5432/postgres"
-# даже не знал что бывает рак молочной железы 
+# даже не знал что бывает рак молочной железы
 data = sklearn.datasets.load_breast_cancer()
 
 X = data.data
@@ -37,8 +52,9 @@ def objective(trial):  # Тут я определяю целевую функц�
     return accuracy
 
 
-# два принтера и два сэмплера. принтеры используются для ранней остановки проб, а сэмплеры — для выбора значений гиперпараметров.
-pruners = {'MedianPruner': optuna.pruners.MedianPruner(), 'HyperbandPruner': optuna.pruners.HyperbandPruner()}
+# два принтера и два сэмплера
+# принтеры используются для ранней остановки проб, а сэмплеры — для выбора значений гиперпараметров.
+pruners = {'MedianPruner': optuna.pruners.MedianPruner(), 'NopPruner': optuna.pruners.NopPruner()}
 samplers = {'RandomSampler': optuna.samplers.RandomSampler(), 'TPESampler': optuna.samplers.TPESampler()}
 
 
@@ -47,7 +63,11 @@ if args.no_learn:
     for pruner in pruners:
         for sampler in samplers:
             study_name = f'study_{pruner}_{sampler}'
-            study = optuna.create_study(direction='maximize', pruner=pruners[pruner], sampler=samplers[sampler], study_name=study_name, storage=storage_url, load_if_exists=True)
+            study = optuna.create_study(
+                direction='maximize', pruner=pruners[pruner],
+                sampler=samplers[sampler], study_name=study_name,
+                storage=storage_url, load_if_exists=True
+                )
             study.optimize(objective, n_trials=50)
 
 # загрузка и сохранение результатов
@@ -55,7 +75,7 @@ if args.no_learn:
 studies = []
 for pruner in pruners:
     for sampler in samplers:
-        study_name = f'study_{pruner}_{sampler}' 
+        study_name = f'study_{pruner}_{sampler}'
         saved_study = optuna.load_study(study_name=study_name, storage=storage_url)
         studies.append(saved_study)
 
@@ -76,7 +96,7 @@ for study in studies:
 # ? мб уюрать show_params
 for study in studies:
     trial = study.best_trial
-    #show_params(trial)
+    # show_params(trial)
     fig = optuna.visualization.plot_optimization_history(study)
     show(fig)
 
@@ -84,6 +104,6 @@ for study in studies:
 # ? мб убрать show_params
 for study in studies:
     trial = study.best_trial
-    #show_params(trial)
+    # show_params(trial)
     fig = optuna.visualization.plot_param_importances(study)
     show(fig)
